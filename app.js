@@ -29,7 +29,7 @@ else{
                 res.status(200).json({ message: 'Successfully Signed up' });
             }
             catch (error) {
-                res.status(405).json({ message: "User Already Exists" });
+                res.status(405).json({ message: "User Already Exists,Please Login" });
 
             }
         }

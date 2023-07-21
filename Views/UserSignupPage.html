@@ -44,9 +44,14 @@ submit.onclick=((e)=>{
 }
 axios.post("http://localhost:3000/user/SignUp",obj)
 .then((result)=>{
-    console.log(result)
+    alert(result.data.message)
 }).catch((error)=>{
     console.log(error)
+    if(error.response.status==405)
+    {
+        alert(error.response.data.message)
+    }
+    else{
     const h4=document.createElement('h4')
     h4.style.color="red"
     h4.append(error.response.data.message)
@@ -54,6 +59,7 @@ axios.post("http://localhost:3000/user/SignUp",obj)
     setTimeout(()=>{
        document.body.removeChild(h4) 
     },5000)
+}
 })
 })
 </script>
