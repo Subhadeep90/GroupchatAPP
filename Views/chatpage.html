@@ -59,13 +59,29 @@ e.preventDefault();
 const obj={
     message:document.getElementById('message').value
 }
- axios.post("http://localhost:3000/user/login/message",obj,{headers:{"Authentication":token}},).then((result)=>{
+ axios.post("http://localhost:3000/user/login/message",obj,{headers:{"Authentication":token}}).then((result)=>{
      console.log(result)
  }).catch((err)=>{ 
      console.log(err)
  })
 }
+window.addEventListener('DOMContentLoaded',fetchallmessage)
+function fetchallmessage()
+{
+    axios.get("http://localhost:3000/user/login/message/getmessage").then((result)=>{
+    const messagearray=result.data.allMessage
+     console.log(messagearray)
+     messagearray.forEach(element => {
+        const h5=document.createElement('h5')
+         h5.append(element.message)
+         document.body.append(h5)
 
+     });
+
+    }).catch((err)=>{
+        console.log(err)
+    })
+}
 </script>
 </body>
 </html> 

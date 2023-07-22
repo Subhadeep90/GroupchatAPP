@@ -16,6 +16,11 @@ const userdetails=require('./Model/userdetails')
 const bodyparser=require('body-parser')
 app.use(bodyparser.json())
 const bcrypt=require('bcrypt')
+app.use('/user/login/message/getmessage',async(req,res)=>{
+const allMessage=await messagedetails.findAll({
+})
+res.status(200).json({message:'Successful',allMessage})
+})
 app.use('/user/login/message',Authentication,async(req,res)=>{
     const message=req.body.message;
     try{
