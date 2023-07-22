@@ -19,11 +19,10 @@ h2{
 <body>
 <h2>Login Page</h2>
  <form>
-  Name:<input type="email" id="email"></input></br></br>
-  Email:<input type="password" id="password"></input></br></br>
+  Email:<input type="email" id="email"></input></br></br>
+  Password:<input type="password" id="password"></input></br></br>
 <button type="submit" id="submit">Login</button></br></br>
-<h5>New users sign up here</h5>
-<a href="./UserSignupPage.html">SignUP</a>
+<a href="./UserSignupPage.html">New users sign up here</a>
 </form>
 
 <script>
@@ -38,10 +37,21 @@ h2{
      }
      e.preventDefault()
      axios.post("http://localhost:3000/user/login",obj).then((result)=>{
-         console.log(result)
+        console.log(result);
+        alert(result.data.message)
+
      }).catch((err)=>{
-     console.log(error)
- })
+     console.log(err)
+    const h4=document.createElement('h4')
+    h4.style.color="red"
+    h4.append(err.response.data.message)
+    
+    document.body.appendChild(h4)
+    setTimeout(()=>{
+       document.body.removeChild(h4) 
+    },5000)
+}
+ )
  }
 
  </script>
