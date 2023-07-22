@@ -1,9 +1,11 @@
 const cors=require('cors')
 const express=require('express')
-const app=express()
+const app=express();
+const Authentication=require('./Middleware/auth')
+const messagedetails=require('./Model/messagedatabase')
 const jwt=require('jsonwebtoken')
-function generateAccessToken(id) {
-    return jwt.sign({userid:id}, '987H5443');
+function generateAccessToken(id ,name) {
+    return jwt.sign({userid:id,userName:name}, '987H5443');
   }
   
 app.use(cors({
@@ -14,6 +16,19 @@ const userdetails=require('./Model/userdetails')
 const bodyparser=require('body-parser')
 app.use(bodyparser.json())
 const bcrypt=require('bcrypt')
+app.use('/user/login/message',Authentication,async(req,res)=>{
+    const message=req.body.message;
+    try{
+        await messagedetails.create({
+        message:message,
+        userdetailId:req.user.id
+    })
+    res.status(200).json({message:'Successful'})
+}
+catch(err){
+    res.status(400).json({message:'Something went wrong'})
+}
+  })
 app.use('/user/login',async(req,res)=>{
 if(req.body.Email=="" || req.body.Password=="")
 {
@@ -38,7 +53,7 @@ if(user.length>0)
       }
       if(success)
       {
-         res.status(200).json({message:'User Logged in Successfully',token:generateAccessToken(user[0].id)})
+         res.status(200).json({message:'User Logged in Successfully',token:generateAccessToken(user[0].id,user[0].Name)})
 
       }
       else{
@@ -97,9 +112,14 @@ else{
     }
     
 )
+userdetails.hasMany(messagedetails);
+messagedetails.belongsTo(userdetails)
 
     userdetails.sync().then(()=>{
-    app.listen(3000);
+     messagedetails.sync().then(()=>{
+        app.listen(3000);
+
+     })
 })
 
 
