@@ -66,6 +66,7 @@ const obj={
  })
 }
 window.addEventListener('DOMContentLoaded',fetchallmessage)
+
 function fetchallmessage()
 {
     axios.get("http://localhost:3000/user/login/message/getmessage").then((result)=>{
