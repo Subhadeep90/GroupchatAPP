@@ -19,6 +19,11 @@ h5{
 </head>
 <body>
 <h2>Chat App</h2>
+<div class="container">
+<button type="submit" id="CreateGroup">Create Group</button>
+
+</div>
+
 <form>
 <h5>Type a message</h5>
 <input type="text" id="message">
@@ -27,7 +32,6 @@ h5{
 </form>
 
 <script>
-
 function parseJwt (token) {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -42,14 +46,41 @@ window.addEventListener('DOMContentLoaded',()=>{
 })
 const token=localStorage.getItem('token')
 const decodedtoken=parseJwt(token) 
-
+const user=localStorage.getItem('user')
+const userparsed=JSON.parse(user)
 function showonscreen()
 {
    const Name=decodedtoken.userName
-   const h5=document.createElement('h5')
-   h5.append(`${Name} joined`)
-   document.body.append(h5)
+
+
+userparsed.forEach(element => {
+    if(element==Name)
+    {
+        const h5=document.createElement('h5')
+
+
+   h5.append('You joined')
+   document.body.append(h5);
+
+    }
+    if(element!=Name)
+    {
+        const h5=document.createElement('h5')
+
+
+    h5.append(`${element} joined`)
+    document.body.append(h5);
+
+    }
+
+})
+
 }
+
+
+
+ 
+
 
 const send=document.getElementById('send');
 send.addEventListener('click',sendmessage)
@@ -66,15 +97,20 @@ const obj={
  })
 }
 window.addEventListener('DOMContentLoaded',fetchallmessage)
+// setTimeout(()=>{
+// location.reload()
+// },9000)
 
-function fetchallmessage()
+
+ function fetchallmessage()
 {
     axios.get("http://localhost:3000/user/login/message/getmessage").then((result)=>{
     const messagearray=result.data.allMessage
      console.log(messagearray)
+    
      messagearray.forEach(element => {
         const h5=document.createElement('h5')
-         h5.append(element.message)
+         h5.append(element.userdetail.Name," ",":",element.message)
          document.body.append(h5)
 
      });
@@ -83,6 +119,13 @@ function fetchallmessage()
         console.log(err)
     })
 }
+
+const createGroup=document.getElementById('CreateGroup');
+createGroup.onclick=()=>{
+    console.log('Hello')
+
+}
+
 </script>
 </body>
 </html> 
