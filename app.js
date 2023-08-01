@@ -1,6 +1,10 @@
 const cors=require('cors')
 const express=require('express')
 const app=express();
+//const cors=require('cors')
+
+const Sequelize=require('sequelize');
+const sequelize=require('./util/database');
 const Authentication=require('./Middleware/auth')
 const messagedetails=require('./Model/messagedatabase')
 const jwt=require('jsonwebtoken')
@@ -12,13 +16,27 @@ app.use(cors({
 origin:"*",
 method:["POST","GET","DELETE","UPDATE"]
 }));
+const io = require('socket.io')(8000,{
+    cors:{
+      origin:"*",
+  
+      method:["POST","GET","DELETE","UPDATE"],
+  
+    },
+  })
 const userdetails=require('./Model/userdetails')
 const bodyparser=require('body-parser')
 app.use(bodyparser.json())
 const bcrypt=require('bcrypt')
 app.use('/user/login/message/getmessage',async(req,res)=>{
 const allMessage=await messagedetails.findAll({
+attributes:['message','userdetailId'],
+    include:[{
+    model:userdetails,
+}],
+group:['messagedetails.id']
 })
+console.log(allMessage)
 res.status(200).json({message:'Successful',allMessage})
 })
 app.use('/user/login/message',Authentication,async(req,res)=>{
@@ -34,6 +52,8 @@ catch(err){
     res.status(400).json({message:'Something went wrong'})
 }
   })
+  const name=[];
+
 app.use('/user/login',async(req,res)=>{
 if(req.body.Email=="" || req.body.Password=="")
 {
@@ -58,9 +78,10 @@ if(user.length>0)
       }
       if(success)
       {
-         res.status(200).json({message:'User Logged in Successfully',token:generateAccessToken(user[0].id,user[0].Name)})
 
-      }
+        name.push(user[0].Name)
+         res.status(200).json({message:'User Logged in Successfully',token:generateAccessToken(user[0].id,user[0].Name),Name:name})
+        }
       else{
         res.status(405).json({message:'Wrong Password'})
 
@@ -115,13 +136,45 @@ else{
         res.status(505).json({message:"Something went wrong"})
     }
     }
+   
     
 )
+const users={};
+io.on('connection', socket => {
+    socket.on('new-user-joined',name=>{
+      users[socket.id]=name
+      socket.broadcast.emit('user-joined',name);
+    });
+    socket.on('send',(message,room)=>{
+     if(room==='')
+     {
+      socket.broadcast.emit('receive',{message:message,name:users[socket.id]})
+     }
+     else
+     {
+      socket.to(room).emit('receive',{message:message,name:users[socket.id]})
+     }
+    
+  
+    })
+    socket.on('join-room',room=>{
+      console.log(room)
+      socket.join(room)
+    })
+    socket.on('disconnect',message=>{
+      socket.broadcast.emit('left',users[socket.id],message)
+      delete users[socket.id];
+    })
+    
+    });
+   
 userdetails.hasMany(messagedetails);
-messagedetails.belongsTo(userdetails)
+messagedetails.belongsTo(userdetails);
+
+
 
     userdetails.sync().then(()=>{
-     messagedetails.sync().then(()=>{
+     messagedetails.sync({force:true}).then(()=>{
         app.listen(3000);
 
      })
